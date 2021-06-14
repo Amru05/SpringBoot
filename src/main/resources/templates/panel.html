@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <title>User panel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+          integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+</head>
+<body>
+
+<main>
+    <!-- Navbar -->
+    <div class="bg-dark d-flex p-0">
+        <div id="header_username" class="p-2 text-white font-weight-bold"></div>
+        <div id="header_roles" class="p-2 w-100 text-white"></div>
+        <a href="/logout" class="p-2 text-secondary text-right text-decoration-none">Logout</a>
+    </div>
+    <!-- Main container -->
+    <div class="row m-0">
+        <!-- Left side - nav panel-->
+        <div class="col-2 mt-3 p-0">
+            <div id="vSelector" class="flex-column nav nav-pills" role="tablist" aria-orientation="vertical">
+                <a sec:authorize="hasRole('ROLE_ADMIN')" id="vSelectorAdmin" class="nav-link" data-bs-toggle="pill"
+                   role="tab" href="#admin_panel"> Admin</a>
+                <a id="vSelectorInfo" class="nav-link active" data-bs-toggle="pill" role="tab"
+                   href="#user_panel">User</a>
+            </div>
+        </div>
+        <!-- Right side - main panel -->
+        <div class="col-10 pl-0 pr-0">
+            <div id="v-pills-tabContent" class="tab-content bg-light p-2">
+                <!-- Admin tab panel -->
+                <div sec:authorize="hasRole('ROLE_ADMIN')" class="tab-pane fade" role="tabpanel"
+                     aria-labelledby="vSelectorAdmin" id="admin_panel">
+                    <h2>Admin panel</h2>
+                    <nav>
+                        <div id="adminTabs" class="nav nav-tabs">
+                            <button id="userTabBtn" class="nav-link active" type="button" data-bs-toggle="tab" href="#usertable">Users table</button>
+                            <button id="newUserTabBtn" class="nav-link" type="button" data-bs-toggle="tab" href="#newuser">New User</button>
+                        </div>
+                    </nav>
+                    <div class="tab-content">
+                        <!-- Users table panel -->
+                        <div class="tab-pane container fade show active" id="usertable">
+                            <h4>All users</h4>
+                            <div class="container bg-white p-2">
+                                <table class="table table-striped border-top">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Age</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Edit</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="usersListTab">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- New User panel -->
+                        <div class="tab-pane container fade" id="newuser">
+                            <h4>Add new user</h4>
+                            <div class="bg-white p-2 text-center">
+                                <form id="newUserForm" class="font-weight-bold col-sm-4 offset-4">
+                                    <div class="form-floating">
+                                        <label for="newuserFirstName">First name</label>
+                                        <input type="text" class="form-control" id="newuserFirstName"
+                                               placeholder="First name" required autofocus/>
+                                    </div>
+                                    <div class="form-floating">
+                                        <label for="newuserLastName">Last name</label>
+                                        <input class="form-control" type="text" id="newuserLastName"
+                                               placeholder="Last name" required/>
+                                    </div>
+                                    <div class="form-floating">
+                                        <label for="newuserAge">Age</label>
+                                        <input class="form-control" type="number" id="newuserAge" placeholder="Age"
+                                               required/>
+                                    </div>
+                                    <div class="form-floating">
+                                        <label for="newuserEmail">Email</label>
+                                        <input class="form-control" type="email" id="newuserEmail" placeholder="Email"
+                                               required/>
+                                    </div>
+                                    <div class="form-floating">
+                                        <label for="newuserPassword">Password</label>
+                                        <input class="form-control" type="password" id="newuserPassword"
+                                               placeholder="password" required/>
+                                    </div>
+                                    <div class="form-floating">
+                                        <label for="newuserRole">Role</label>
+                                        <select id="newuserRole" class="form-control" multiple size=2>
+                                        </select>
+                                    </div>
+                                </form>
+                                <button onclick="addNewUser()" class="btn btn-success m-3">Add new user</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- User info panel -->
+                <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="vSelectorInfo" id="user_panel">
+                    <h2>User information-page</h2>
+                    <div class="pl-3 pt-1 d-flex border-top border-left border-right"><h4> About user</h4></div>
+                    <div class="bg-white border p-3">
+                        <table class="table table-striped border-top">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Age</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                            </tr>
+                            </thead>
+                            <tbody id="user_info"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div sec:authorize="hasRole('ROLE_ADMIN')">
+        <!-- Modal Edit User -->
+        <div class="modal fade" id="editUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+             aria-labelledby="editUserLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editUserLabel">Edit User</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="bg-white p-2 text-center">
+                            <form id="editUserForm" class="font-weight-bold col-sm-8 offset-2">
+                                <input type="hidden" id="edituserId"/>
+                                <div class="form-floating">
+                                    <label for="edituserFirstName">First name</label>
+                                    <input type="text" class="form-control" id="edituserFirstName"
+                                           placeholder="First name" required autofocus/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="edituserLastName">Last name</label>
+                                    <input class="form-control" type="text" id="edituserLastName"
+                                           placeholder="Last name" required/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="edituserAge">Age</label>
+                                    <input class="form-control" type="number" id="edituserAge" placeholder="Age"
+                                           required/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="edituserEmail">Email</label>
+                                    <input class="form-control" type="email" id="edituserEmail" placeholder="Email"
+                                           required/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="edituserPassword">Password</label>
+                                    <input class="form-control" type="password" id="edituserPassword"
+                                           placeholder="password" required/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="edituserRole">Role</label>
+                                    <select id="edituserRole" class="form-control" multiple size=2>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button id="editButton" type="button" class="btn btn-primary">Edit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Delete User -->
+        <div class="modal fade" id="deleteUser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+             aria-labelledby="delUserLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="delUserLabel">Delete User</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="bg-white p-2 text-center">
+                            <form id="delUserForm" class="font-weight-bold col-sm-8 offset-2">
+                                <div class="form-floating">
+                                    <label for="deluserFirstName">First name</label>
+                                    <input type="text" class="form-control" id="deluserFirstName"
+                                           placeholder="First name" readonly/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="deluserLastName">Last name</label>
+                                    <input class="form-control" type="text" id="deluserLastName" placeholder="Last name"
+                                           readonly/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="deluserAge">Age</label>
+                                    <input class="form-control" type="number" id="deluserAge" placeholder="Age"
+                                           readonly/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="deluserEmail">Email</label>
+                                    <input class="form-control" type="email" id="deluserEmail" placeholder="Email"
+                                           readonly/>
+                                </div>
+                                <div class="form-floating">
+                                    <label for="deluserRole">Role</label>
+                                    <select id="deluserRole" class="form-control" multiple size=2 readonly="">
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button id="delButton" type="button" class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js"
+        integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT"
+        crossorigin="anonymous"></script>
+<script src="/js/functions.js"></script>
+<script sec:authorize="hasRole('ROLE_ADMIN')" src="/js/admin-functions.js"></script>
+</body>
+</html>
